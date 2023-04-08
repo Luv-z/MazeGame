@@ -40,7 +40,7 @@
     el: '#app',
     data: {
       // 迷宫大小
-      mazeSize: 25,
+      mazeSize: 50,
       // 点坐标（从 0-0 开始）
       dotCoords: {
         x: 0,
@@ -78,16 +78,13 @@
         // 定义一个栈
         let stack = []
         // 还存在未标记的单元格
-        while(markNum < this.mazeSize * this.mazeSize) {
+        while(markNum < this.mazeSize * this.mazeSize || stack.length !== 0) {
           let next = this.getAdjacentSquares(x, y)
           // 如果不存在相邻的没有标记的单元格
           if(!next && stack.length > 0) {
             let popSquare = stack.pop()
             x = popSquare.x
             y = popSquare.y
-          }
-          else if(!next && stack.length === 0) {
-            markNum = this.mazeSize * this.mazeSize
           }
           // 存在相邻的没有标记的单元格
           else {
@@ -114,10 +111,10 @@
             next.square.mark = true
             x = next.x
             y = next.y
-            // markNum += 1
+            markNum += 1
           }
         }
-        console.log(this.mazeSquares)
+        this.mazeSquares[this.mazeSize - 1][this.mazeSize - 1].right = true
         this.$forceUpdate()
       },
       // 随机获取相邻单元格，没有则返回false
@@ -169,26 +166,15 @@
       },
       // 以下是键盘交互
       keyDown(event) {
-        switch (event.keyCode) {
-          case (keyCode.W || keyCode.ArrowUp): {
-            this.onUp()
-            break
-          }
-          case (keyCode.A || keyCode.ArrowLeft): {
-            this.onLeft()
-            break
-          }
-          case (keyCode.S || keyCode.ArrowDown): {
-            this.onDown()
-            break
-          }
-          case (keyCode.D || keyCode.ArrowRight): {
-            this.onRight()
-            break
-          }
-          default: {
-            break
-          }
+        let code = event.keyCode
+        if(code === keyCode.W || code === keyCode.ArrowUp) {
+          this.onUp()
+        } else if(code === keyCode.A || code === keyCode.ArrowLeft) {
+          this.onLeft()
+        } else if(code === keyCode.S || code === keyCode.ArrowDown) {
+          this.onDown()
+        } else if(code === keyCode.D || code === keyCode.ArrowRight) {
+          this.onRight()
         }
       },
       onUp() {
@@ -216,11 +202,9 @@
 </script>
 </body>
 <style>
-    html {
-        height: 100%;
-    }
     body {
         height: 100%;
+        padding: 30px;
         margin: 0;
     }
     #app {
