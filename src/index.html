@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+  <title>MazeGame</title>
+  <script src="./vue.js"></script>
 </head>
 <body>
 <div id="app">
   <div class="maze-container">
     <div v-for="(squares, xIndex) in mazeSquares" :key="xIndex">
       <div
-        v-for="(square, yIndex) in mazeSquares[xIndex]"
+        v-for="(square, yIndex) in squares"
         :key="yIndex"
         class="maze-square"
         :class="{
@@ -40,7 +40,7 @@
     el: '#app',
     data: {
       // 迷宫大小
-      mazeSize: 10,
+      mazeSize: 25,
       // 点坐标（从 0-0 开始）
       dotCoords: {
         x: 0,
@@ -55,14 +55,117 @@
         left: false,
         down: false,
         right: false,
+        mark: false,
       }
-      this.mazeSquares = new Array(this.mazeSize).fill(square).map(() => new Array(this.mazeSize).fill(square))
+      for(let i = 0; i < this.mazeSize; i++) {
+        let array = new Array(this.mazeSize)
+        for(let j = 0; j < this.mazeSize; j++) {
+          array[j] = {...square}
+        }
+        this.mazeSquares[i] = array
+      }
+      this.initMaze()
       document.addEventListener('keydown', this.keyDown)
     },
     methods: {
       // 以下是迷宫构建
       initMaze() {
-
+        let markNum = 1
+        let x = 0
+        let y = 0
+        // 标记起点单元格
+        this.mazeSquares[0][0].mark = true
+        // 定义一个栈
+        let stack = []
+        // 还存在未标记的单元格
+        while(markNum < this.mazeSize * this.mazeSize) {
+          let next = this.getAdjacentSquares(x, y)
+          // 如果不存在相邻的没有标记的单元格
+          if(!next && stack.length > 0) {
+            let popSquare = stack.pop()
+            x = popSquare.x
+            y = popSquare.y
+          }
+          else if(!next && stack.length === 0) {
+            markNum = this.mazeSize * this.mazeSize
+          }
+          // 存在相邻的没有标记的单元格
+          else {
+            // 当前单元格入栈
+            let square = {
+              x: x,
+              y: y,
+            }
+            stack.push(square)
+            // 移除当前迷宫单元与相邻迷宫单元的墙
+            if(x === next.x && y - next.y === 1) {
+              this.mazeSquares[x][y].up = true
+              next.square.down = true
+            } else if(x === next.x && next.y - y === 1) {
+              this.mazeSquares[x][y].down = true
+              next.square.up = true
+            } else if(y === next.y && x - next.x === 1) {
+              this.mazeSquares[x][y].left = true
+              next.square.right = true
+            } else if(y === next.y && next.x - x === 1) {
+              this.mazeSquares[x][y].right = true
+              next.square.left = true
+            }
+            next.square.mark = true
+            x = next.x
+            y = next.y
+            // markNum += 1
+          }
+        }
+        console.log(this.mazeSquares)
+        this.$forceUpdate()
+      },
+      // 随机获取相邻单元格，没有则返回false
+      getAdjacentSquares(x, y) {
+        let next = {}
+        let num = [0, 1, 2, 3]
+        while(num.length !== 0 && !next.square) {
+          let index = Math.round(Math.random() * (num.length - 1))
+          switch (num[index]) {
+            case 0: {
+              if(x + 1 < this.mazeSize && !this.mazeSquares[x + 1][y].mark) {
+                next.square = this.mazeSquares[x + 1][y]
+                next.x = x + 1
+                next.y = y
+              }
+              num.splice(num.indexOf(0), 1)
+              break
+            }
+            case 1: {
+              if(x - 1 >= 0 && !this.mazeSquares[x - 1][y].mark) {
+                next.square = this.mazeSquares[x - 1][y]
+                next.x = x - 1
+                next.y = y
+              }
+              num.splice(num.indexOf(1), 1)
+              break
+            }
+            case 2: {
+              if(y + 1 < this.mazeSize && !this.mazeSquares[x][y + 1].mark) {
+                next.square = this.mazeSquares[x][y + 1]
+                next.x = x
+                next.y = y + 1
+              }
+              num.splice(num.indexOf(2), 1)
+              break
+            }
+            case 3: {
+              if(y - 1 >= 0 && !this.mazeSquares[x][y - 1].mark) {
+                next.square = this.mazeSquares[x][y - 1]
+                next.x = x
+                next.y = y - 1
+              }
+              num.splice(num.indexOf(3), 1)
+              break
+            }
+          }
+        }
+        return next.square ? next : false
       },
       // 以下是键盘交互
       keyDown(event) {
@@ -125,11 +228,14 @@
         width: 100%;
     }
     .maze-container {
+        height: 100%;
         display: flex;
+        justify-content: center;
+        align-items: center;
     }
     .maze-square {
-        width: 60px;
-        height: 60px;
+        width: 30px;
+        height: 30px;
         border: 1px solid #000;
         display: flex;
         justify-content: center;
@@ -142,16 +248,16 @@
         background: #000;
     }
     .up-no-border {
-        border-top: none;
+        border-top: 1px solid rgba(0, 0, 0, 0);
     }
     .down-no-border {
-        border-bottom: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0);
     }
     .left-no-border {
-        border-left: none;
+        border-left: 1px solid rgba(0, 0, 0, 0);
     }
     .right-no-border {
-        border-right: none;
+        border-right: 1px solid rgba(0, 0, 0, 0);
     }
 </style>
 </html>
