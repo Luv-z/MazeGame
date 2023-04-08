@@ -40,7 +40,8 @@
     el: '#app',
     data: {
       // 迷宫大小
-      mazeSize: 50,
+      mazeSizeX: 100,
+      mazeSizeY: 40,
       // 点坐标（从 0-0 开始）
       dotCoords: {
         x: 0,
@@ -57,9 +58,9 @@
         right: false,
         mark: false,
       }
-      for(let i = 0; i < this.mazeSize; i++) {
-        let array = new Array(this.mazeSize)
-        for(let j = 0; j < this.mazeSize; j++) {
+      for(let i = 0; i < this.mazeSizeX; i++) {
+        let array = new Array(this.mazeSizeY)
+        for(let j = 0; j < this.mazeSizeY; j++) {
           array[j] = {...square}
         }
         this.mazeSquares[i] = array
@@ -78,7 +79,7 @@
         // 定义一个栈
         let stack = []
         // 还存在未标记的单元格
-        while(markNum < this.mazeSize * this.mazeSize || stack.length !== 0) {
+        while(markNum < this.mazeSizeX * this.mazeSizeY || stack.length !== 0) {
           let next = this.getAdjacentSquares(x, y)
           // 如果不存在相邻的没有标记的单元格
           if(!next && stack.length > 0) {
@@ -114,7 +115,7 @@
             markNum += 1
           }
         }
-        this.mazeSquares[this.mazeSize - 1][this.mazeSize - 1].right = true
+        this.mazeSquares[this.mazeSizeX - 1][this.mazeSizeY - 1].right = true
         this.$forceUpdate()
       },
       // 随机获取相邻单元格，没有则返回false
@@ -125,7 +126,7 @@
           let index = Math.round(Math.random() * (num.length - 1))
           switch (num[index]) {
             case 0: {
-              if(x + 1 < this.mazeSize && !this.mazeSquares[x + 1][y].mark) {
+              if(x + 1 < this.mazeSizeX && !this.mazeSquares[x + 1][y].mark) {
                 next.square = this.mazeSquares[x + 1][y]
                 next.x = x + 1
                 next.y = y
@@ -143,7 +144,7 @@
               break
             }
             case 2: {
-              if(y + 1 < this.mazeSize && !this.mazeSquares[x][y + 1].mark) {
+              if(y + 1 < this.mazeSizeY && !this.mazeSquares[x][y + 1].mark) {
                 next.square = this.mazeSquares[x][y + 1]
                 next.x = x
                 next.y = y + 1
@@ -188,12 +189,12 @@
         }
       },
       onDown() {
-        if(this.dotCoords.y < this.mazeSize - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].down) {
+        if(this.dotCoords.y < this.mazeSizeY - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].down) {
           this.dotCoords.y += 1
         }
       },
       onRight() {
-        if(this.dotCoords.x < this.mazeSize - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].right) {
+        if(this.dotCoords.x < this.mazeSizeX - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].right) {
           this.dotCoords.x += 1
         }
       },
