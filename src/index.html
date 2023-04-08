@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <div class="maze-container">
+    <div v-for="(squares, xIndex) in mazeSquares" :key="xIndex">
+      <div
+        v-for="(square, yIndex) in mazeSquares[xIndex]"
+        :key="yIndex"
+        class="maze-square"
+        :class="{
+          'up-no-border': square.up,
+          'left-no-border': square.left,
+          'down-no-border': square.down,
+          'right-no-border': square.right,
+        }"
+      >
+        <div v-if="xIndex === dotCoords.x && yIndex === dotCoords.y" class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const keyCode = {
+    W: 87,
+    A: 65,
+    S: 83,
+    D: 68,
+    ArrowUp: 38,
+    ArrowLeft: 37,
+    ArrowDown: 40,
+    ArrowRight: 39,
+  }
+  new Vue({
+    el: '#app',
+    data: {
+      // 迷宫大小
+      mazeSize: 10,
+      // 点坐标（从 0-0 开始）
+      dotCoords: {
+        x: 0,
+        y: 0,
+      },
+      mazeSquares: [],
+    },
+    mounted() {
+      // 初始化迷宫方块
+      let square = {
+        up: false,
+        left: false,
+        down: false,
+        right: false,
+      }
+      this.mazeSquares = new Array(this.mazeSize).fill(square).map(() => new Array(this.mazeSize).fill(square))
+      document.addEventListener('keydown', this.keyDown)
+    },
+    methods: {
+      // 以下是迷宫构建
+      initMaze() {
+
+      },
+      // 以下是键盘交互
+      keyDown(event) {
+        switch (event.keyCode) {
+          case (keyCode.W || keyCode.ArrowUp): {
+            this.onUp()
+            break
+          }
+          case (keyCode.A || keyCode.ArrowLeft): {
+            this.onLeft()
+            break
+          }
+          case (keyCode.S || keyCode.ArrowDown): {
+            this.onDown()
+            break
+          }
+          case (keyCode.D || keyCode.ArrowRight): {
+            this.onRight()
+            break
+          }
+          default: {
+            break
+          }
+        }
+      },
+      onUp() {
+        if(this.dotCoords.y > 0 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].up) {
+          this.dotCoords.y -= 1
+        }
+      },
+      onLeft() {
+        if(this.dotCoords.x > 0 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].left) {
+          this.dotCoords.x -= 1
+        }
+      },
+      onDown() {
+        if(this.dotCoords.y < this.mazeSize - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].down) {
+          this.dotCoords.y += 1
+        }
+      },
+      onRight() {
+        if(this.dotCoords.x < this.mazeSize - 1 && this.mazeSquares[this.dotCoords.x][this.dotCoords.y].right) {
+          this.dotCoords.x += 1
+        }
+      },
+    }
+  })
+</script>
+</body>
+<style>
+    html {
+        height: 100%;
+    }
+    body {
+        height: 100%;
+        margin: 0;
+    }
+    #app {
+        height: 100%;
+        width: 100%;
+    }
+    .maze-container {
+        display: flex;
+    }
+    .maze-square {
+        width: 60px;
+        height: 60px;
+        border: 1px solid #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .dot {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #000;
+    }
+    .up-no-border {
+        border-top: none;
+    }
+    .down-no-border {
+        border-bottom: none;
+    }
+    .left-no-border {
+        border-left: none;
+    }
+    .right-no-border {
+        border-right: none;
+    }
+</style>
+</html>
